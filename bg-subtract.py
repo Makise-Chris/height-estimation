@@ -164,17 +164,43 @@ class ForegroundExtraction:
         mask[background!=255] = cv.GC_BGD
         mask[foreground!=255] = cv.GC_FGD
 
+        # gray_image = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
+        # binarized_image = cv.adaptiveThreshold(
+        #     gray_image,
+        #     maxValue=1,
+        #     adaptiveMethod=cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+        #     thresholdType=cv.THRESH_BINARY,
+        #     blockSize=9,
+        #     C=7,
+        # )
+        # mask[binarized_image == 0] = cv.GC_FGD
+        # debug(gray_image)
+
         bgdModel = np.zeros((1, 65), dtype=np.float64)
         fgdModel = np.zeros((1, 65), dtype=np.float64)
 
-        cv.grabCut(image,mask,None,bgdModel,fgdModel,5,cv.GC_INIT_WITH_MASK)
-        mask = np.where((mask==2)|(mask==0),0,1).astype('uint8')
+        # Define boundary rectangle containing the foreground object
+        height, width, _ = image.shape
+        left_margin_proportion = 0.3
+        right_margin_proportion = 0.3
+        up_margin_proportion = 0.1
+        down_margin_proportion = 0.1
+
+        boundary_rectangle = (
+            int(width * left_margin_proportion),
+            int(height * up_margin_proportion),
+            int(width * (1 - right_margin_proportion)),
+            int(height * (1 - down_margin_proportion)),
+        )
+
+        cv.grabCut(image,mask,boundary_rectangle,bgdModel,fgdModel,5,cv.GC_INIT_WITH_MASK)
+        mask = np.where((mask == cv.GC_PR_BGD)|(mask == cv.GC_PR_BGD),0,1).astype('uint8')
         mask *= 255
         return mask
 
 
 # Read images
-source = readSource('./test_images/test1/source.png')
+source = readSource('./test_images/test1/source.jpg')
 foregroundSeed = readMask('./test_images/test1/foreground.png')
 backgroundSeed = readMask('./test_images/test1/background.png')
 threshold = 20000
@@ -188,7 +214,7 @@ extraction = ForegroundExtraction(source, foregroundSeed, backgroundSeed, thresh
 result, _refinedMask, _contour, _contourSource, _initialMask = extraction.run()
 
 # Figure out the paths for the debugging images
-output = 'test_images/test6/out.png'
+output = 'test_images/test1/out.png'
 splitString = output.split('.')
 _refinedMaskPath = str(splitString[0]) + '_refinedMask.'
 _contourPath = str(splitString[0]) + '_contour.'
