@@ -21,7 +21,8 @@ def calibrate(dirpath, prefix, image_format, square_size, width=9, height=6):
     images = glob.glob(dirpath+'/' + prefix + '*.' + image_format)
 
     cv2.namedWindow("img", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("img", 300, 500)
+    cv2.resizeWindow("img", 500, 600)
+
     for fname in images:
         img = cv2.imread(fname)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -61,28 +62,3 @@ def reprojection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs):
     mean_error = np.sqrt(total_error / len(objpoints))
     print("Reprojection error: ", mean_error)
     return mean_error
-
-def save_coefficients(mtx, dist, path):
-    """ Save the camera matrix and the distortion coefficients to given path/file. """
-    cv_file = cv2.FileStorage(path, cv2.FILE_STORAGE_WRITE)
-    cv_file.write("K", mtx)
-    cv_file.write("D", dist)
-    # note you *release* you don't close() a FileStorage object
-    cv_file.release()
-def load_coefficients(path):
-    """ Loads camera matrix and distortion coefficients. """
-    # FILE_STORAGE_READ
-    cv_file = cv2.FileStorage(path, cv2.FILE_STORAGE_READ)
-
-    # note we also have to specify the type to retrieve other wise we only get a
-    # FileNode object back instead of a matrix
-    camera_matrix = cv_file.getNode("K").mat()
-    dist_matrix = cv_file.getNode("D").mat()
-
-    cv_file.release()
-    return [camera_matrix, dist_matrix]
-
-# ret, mtx, dist, rvecs, tvecs= calibrate('./test_images/chess','chess','png',0.015)
-# print(mtx)
-# print(rvecs)
-# print(tvecs)
