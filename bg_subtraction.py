@@ -6,7 +6,7 @@ import cv2
 from glob import glob
 from tqdm import tqdm
 
-test_images = glob("./test_images/test1/*")
+test_images = glob("./test_images/rectified/*")
 
 """ Load the model """
 model = tf.keras.models.load_model("unet.h5")
