@@ -1,7 +1,7 @@
 import cv2
 
-cap=cv2.VideoCapture(f"http://192.168.0.101:4747/video")
-cap2=cv2.VideoCapture(f"http://192.168.0.102:4747/video")
+cap=cv2.VideoCapture(f"http://192.168.97.245:4747/video")
+cap2=cv2.VideoCapture(f"http://192.168.97.243:4747/video")
 num=0
 
 while cap.isOpened():
